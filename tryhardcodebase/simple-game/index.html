@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Dodge</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game-shell">
+    <section class="intro">
+      <p class="eyebrow">Mini Browser Game</p>
+      <h1>Neon Dodge</h1>
+      <p class="tagline">Slide left and right, dodge the falling blocks, and survive as long as you can.</p>
+    </section>
+
+    <section class="play-area">
+      <div class="hud">
+        <div class="hud-card">
+          <span class="label">Score</span>
+          <strong id="score">0</strong>
+        </div>
+        <div class="hud-card">
+          <span class="label">Best</span>
+          <strong id="best-score">0</strong>
+        </div>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="game" width="480" height="640" aria-label="Neon Dodge game area"></canvas>
+
+        <div class="overlay" id="overlay">
+          <p class="overlay-kicker" id="overlay-kicker">Ready?</p>
+          <h2 id="overlay-title">Stay alive.</h2>
+          <p id="overlay-text">Use W, A, S, and D or the arrow keys to move. The pace gets faster the longer you last.</p>
+          <button id="start-button" type="button">Start Game</button>
+        </div>
+      </div>
+
+      <div class="controls">
+        <span>`W` / `A` / `S` / `D` or Arrow Keys to move</span>
+        <span>`Space` to start again</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
