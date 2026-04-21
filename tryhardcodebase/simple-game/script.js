@@ -10,6 +10,8 @@ const startButton = document.getElementById("start-button");
 
 const width = canvas.width;
 const height = canvas.height;
+const playerVerticalPadding = 24;
+const playerVerticalRange = 180;
 const keys = new Set();
 
 let player;
@@ -22,6 +24,17 @@ let gameOver = false;
 let lastFrame = performance.now();
 
 bestScoreElement.textContent = bestScore;
+
+function getPlayerMinY(playerHeight) {
+  return Math.max(
+    playerVerticalPadding,
+    height - playerVerticalRange - playerHeight - playerVerticalPadding
+  );
+}
+
+function getPlayerMaxY(playerHeight) {
+  return height - playerHeight - playerVerticalPadding;
+}
 
 function loadBestScore() {
   try {
@@ -44,7 +57,7 @@ function resetGame() {
     width: 60,
     height: 20,
     x: width / 2 - 30,
-    y: height - 56,
+    y: getPlayerMaxY(20),
     speed: 360,
   };
   hazards = [];
@@ -122,7 +135,10 @@ function update(deltaSeconds) {
   player.x += moveX * player.speed * deltaSeconds;
   player.y += moveY * player.speed * deltaSeconds;
   player.x = Math.max(0, Math.min(width - player.width, player.x));
-  player.y = Math.max(0, Math.min(height - player.height, player.y));
+  player.y = Math.max(
+    getPlayerMinY(player.height),
+    Math.min(getPlayerMaxY(player.height), player.y)
+  );
 
   score += deltaSeconds * 22;
   updateScore();
@@ -184,6 +200,61 @@ function drawBackground() {
   }
 }
 
+function drawPlayerZone() {
+  const playerHeight = player?.height ?? 20;
+  const zoneTop = getPlayerMinY(playerHeight);
+  const zoneBottom = getPlayerMaxY(playerHeight) + playerHeight;
+  const zoneHeight = zoneBottom - zoneTop;
+  const pulse = 0.45 + Math.sin(performance.now() * 0.003) * 0.1;
+
+  ctx.save();
+
+  const zoneFill = ctx.createLinearGradient(0, zoneTop, 0, zoneBottom);
+  zoneFill.addColorStop(0, "rgba(57, 212, 255, 0.03)");
+  zoneFill.addColorStop(0.5, "rgba(138, 245, 211, 0.06)");
+  zoneFill.addColorStop(1, "rgba(7, 13, 22, 0)");
+  ctx.fillStyle = zoneFill;
+  ctx.fillRect(0, zoneTop, width, zoneHeight);
+
+  ctx.strokeStyle = `rgba(138, 245, 211, ${0.2 + pulse * 0.18})`;
+  ctx.lineWidth = 2;
+  ctx.shadowColor = "rgba(57, 212, 255, 0.28)";
+  ctx.shadowBlur = 14;
+  ctx.beginPath();
+  ctx.moveTo(48, zoneTop + 0.5);
+  ctx.lineTo(width - 48, zoneTop + 0.5);
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+  ctx.lineWidth = 1;
+  ctx.setLineDash([8, 12]);
+  ctx.beginPath();
+  ctx.moveTo(70, zoneTop + 11.5);
+  ctx.lineTo(width - 70, zoneTop + 11.5);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle = `rgba(57, 212, 255, ${0.16 + pulse * 0.08})`;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(26, zoneTop + 26);
+  ctx.lineTo(26, zoneBottom - 26);
+  ctx.lineTo(54, zoneBottom - 26);
+  ctx.moveTo(width - 26, zoneTop + 26);
+  ctx.lineTo(width - 26, zoneBottom - 26);
+  ctx.lineTo(width - 54, zoneBottom - 26);
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(138, 245, 211, 0.5)";
+  for (let i = 0; i < 4; i += 1) {
+    const markerX = 82 + i * 108;
+    ctx.fillRect(markerX, zoneTop - 3, 18, 6);
+  }
+
+  ctx.restore();
+}
+
 function drawPlayer() {
   const glow = ctx.createLinearGradient(player.x, player.y, player.x + player.width, player.y);
   glow.addColorStop(0, "#8af5d3");
@@ -242,6 +313,7 @@ function drawGameOverBanner() {
 
 function draw() {
   drawBackground();
+  drawPlayerZone();
   hazards.forEach(drawHazard);
   drawPlayer();
   drawGameOverBanner();
